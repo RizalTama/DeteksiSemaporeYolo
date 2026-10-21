@@ -1,0 +1,7 @@
+-r ../requirements.txt
+flask>=3.0
+# dipin ke 0.10.14 (bukan >=0.10) -- versi lebih baru (0.10.31/0.10.33) punya bug
+# packaging yang dilaporkan di Windows: "module 'mediapipe' has no attribute
+# 'solutions'" (github.com/google-ai-edge/mediapipe/issues/6200, #6204, #6261).
+# 0.10.14 terkonfirmasi tidak kena bug ini.
+mediapipe==0.10.14

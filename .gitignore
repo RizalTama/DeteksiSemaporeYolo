@@ -1,0 +1,19 @@
+# Data pribadi klien & bundel rilis (tidak di-push ke repo publik)
+Data_Client/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Artefak training/runtime
+*.cache
+output/
+hasil.txt
+web-app/output/
+web-app/hasil.txt
+
+# OS
+.DS_Store

@@ -1,0 +1,7 @@
+ultralytics>=8.3
+opencv-python
+numpy<2
+torch
+torchvision
+openvino
+onnx>=1.12.0

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deteksi Semaphore Realtime</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+<div class="max-w-7xl mx-auto p-4 md:p-8">
+
+  <header class="flex items-center gap-3 mb-6">
+    <i class="fa-solid fa-flag text-amber-400 text-2xl"></i>
+    <h1 class="text-xl md:text-2xl font-bold tracking-tight">Deteksi Semaphore Realtime</h1>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Video -->
+    <div class="lg:col-span-2">
+      <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden shadow-lg">
+        <img id="video" src="/video_feed" class="w-full aspect-video object-cover bg-black" alt="Video stream">
+      </div>
+      <div id="error-banner" class="hidden mt-3 bg-red-950 border border-red-800 text-red-300 text-sm rounded-lg px-4 py-2">
+        <i class="fa-solid fa-triangle-exclamation mr-2"></i><span id="error-text"></span>
+      </div>
+      <p class="mt-3 text-xs text-slate-500">
+        <i class="fa-regular fa-lightbulb mr-1"></i>
+        Tahan pose sampai bar kuning penuh. Untuk huruf ganda, turunkan bendera sebentar lalu peragakan lagi.
+      </p>
+    </div>
+
+    <!-- Panel -->
+    <div class="space-y-4">
+
+      <!-- Kontrol kamera -->
+      <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+        <div class="flex gap-2">
+          <button id="btn-start" class="flex-1 bg-emerald-600 hover:bg-emerald-500 transition rounded-lg py-2 px-3 text-sm font-medium flex items-center justify-center gap-2">
+            <i class="fa-solid fa-video"></i> Mulai Kamera
+          </button>
+          <button id="btn-stop" disabled class="flex-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 transition rounded-lg py-2 px-3 text-sm font-medium flex items-center justify-center gap-2">
+            <i class="fa-solid fa-video-slash"></i> Stop
+          </button>
+        </div>
+      </div>
+
+      <!-- Status deteksi -->
+      <div class="bg-slate-900 rounded-xl border border-slate-800 p-4 space-y-3">
+        <div class="flex justify-between items-center text-sm">
+          <span class="text-slate-400"><i class="fa-solid fa-crosshairs mr-1.5"></i>YOLO</span>
+          <span id="huruf-yolo" class="font-mono text-lg font-bold text-sky-400">-</span>
+        </div>
+        <div class="flex justify-between items-center text-sm">
+          <span class="text-slate-400"><i class="fa-solid fa-person-walking mr-1.5"></i>Pose</span>
+          <span id="huruf-pose" class="font-mono text-lg font-bold text-violet-400">-</span>
+        </div>
+        <hr class="border-slate-800">
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-slate-400"><i class="fa-solid fa-hourglass-half mr-1.5"></i>Menahan</span>
+            <span id="kandidat" class="font-mono font-bold text-amber-400">-</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+            <div id="progress-bar" class="bg-amber-400 h-2.5 rounded-full transition-all duration-150" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kalimat -->
+      <div class="bg-slate-900 rounded-xl border border-slate-800 p-4 relative">
+        <div class="text-slate-400 text-sm mb-2"><i class="fa-solid fa-align-left mr-1.5"></i>Kalimat</div>
+        <div id="kalimat" class="font-mono text-2xl font-bold break-all min-h-[2rem] text-white">&nbsp;</div>
+        <div id="reset-flash" class="hidden absolute inset-0 flex items-center justify-center bg-rose-950/90 rounded-xl">
+          <span class="text-rose-300 font-bold text-lg"><i class="fa-solid fa-hand-peace mr-2"></i>Reset!</span>
+        </div>
+      </div>
+
+      <!-- Gestur spasi -->
+      <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+        <div class="flex justify-between text-sm mb-1">
+          <span class="text-slate-400"><i class="fa-solid fa-person mr-1.5"></i>Gestur Spasi</span>
+          <span id="spasi-label" class="font-mono font-bold text-slate-500">-</span>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+          <div id="spasi-progress-bar" class="bg-emerald-400 h-2.5 rounded-full transition-all duration-150" style="width:0%"></div>
+        </div>
+        <p class="mt-2 text-xs text-slate-500">
+          Berdiri tegap (lengan turun) tanpa gerakan &plusmn;7-8 detik untuk menambah spasi.
+          Dua jari (telunjuk+tengah) untuk reset kalimat langsung.
+        </p>
+      </div>
+
+      <!-- Simpan / Reset -->
+      <div class="bg-slate-900 rounded-xl border border-slate-800 p-4 space-y-3">
+        <div class="flex gap-2">
+          <button id="btn-save" class="flex-1 bg-sky-600 hover:bg-sky-500 transition rounded-lg py-2 px-3 text-sm font-medium flex items-center justify-center gap-2">
+            <i class="fa-solid fa-camera"></i> Simpan Frame
+          </button>
+          <button id="btn-reset" class="flex-1 bg-rose-700 hover:bg-rose-600 transition rounded-lg py-2 px-3 text-sm font-medium flex items-center justify-center gap-2">
+            <i class="fa-solid fa-rotate-left"></i> Reset
+          </button>
+        </div>
+        <div class="flex items-center justify-between text-sm text-slate-400">
+          <span><i class="fa-regular fa-images mr-1.5"></i>Tersimpan</span>
+          <span id="saved-count" class="font-mono font-bold text-white">0/4</span>
+        </div>
+        <a id="grid-link" href="#" target="_blank" class="hidden text-center text-sm bg-emerald-700 hover:bg-emerald-600 transition rounded-lg py-2 px-3 items-center justify-center gap-2">
+          <i class="fa-solid fa-download"></i> Unduh Grid Final
+        </a>
+        <div id="toast" class="hidden text-xs text-center"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="mt-8 text-center text-xs text-slate-600">
+    Versi desktop: <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">S</kbd> Simpan &middot;
+    <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">R</kbd> Reset &middot;
+    <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">Q</kbd> Keluar (di web: tombol Stop / tutup tab)
+  </footer>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
